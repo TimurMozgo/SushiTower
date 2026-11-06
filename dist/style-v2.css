@@ -10,3 +10,5 @@ html,body{background:#35231b}body{font-family:'Trebuchet MS','Segoe UI',Arial,sa
 .compact-city .city-canvas{width:390px;height:540px}.compact-city .city-terrain{object-fit:cover}.compact-city .cafe-0{left:26%!important;top:30%!important}.compact-city .cafe-1{left:74%!important;top:30%!important}.compact-city .cafe-2{left:50%!important;top:70%!important}.compact-city .cafe-marker{width:166px}.compact-city .marker-building{width:61px;height:59px;margin-left:49px}.compact-city .marker-building>img:first-child{width:61px;height:59px}.compact-city .marker-lock{width:20px;height:24px;left:21px;top:18px}.compact-city .marker-info{padding:10px 11px}.compact-city .marker-info>b{font-size:12px;margin-bottom:5px}.compact-city .marker-status{font-size:6.5px;margin-bottom:4px}.compact-city .city-world{top:118px;bottom:135px}
 
 .studio-credit{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:8px;letter-spacing:.45px;color:#d4b69c;pointer-events:none}.studio-credit b{color:#f6dfbb;font-weight:700}
+
+.income-preview{font-size:10px!important;text-align:center;line-height:1.5!important}.buy-floor span{font-size:9px}.shop-row small{font-size:9px}
