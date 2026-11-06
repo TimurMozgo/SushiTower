@@ -4,12 +4,14 @@ const finite=(v,f=0)=>Number.isFinite(v)&&v>=0?v:f;
 function restaurant(s={},floors=1){return {floors:Math.min(5,Math.max(1,Math.floor(finite(s.floors,floors)))),kitchen:Math.max(1,Math.floor(finite(s.kitchen,1))),lift:Math.max(1,Math.floor(finite(s.lift,1))),cash:Math.max(1,Math.floor(finite(s.cash,1))),served:Math.floor(finite(s.served)),best:Math.floor(finite(s.best)),pending:finite(s.pending)}}
 function load(raw,legacy,now=Date.now()){if(raw?.version===3){const restaurants={};for(const c of CAFES)if(raw.restaurants?.[c.id])restaurants[c.id]=restaurant(raw.restaurants[c.id]);restaurants.park??=restaurant({},3);return {version:3,coins:finite(raw.coins,300),gems:finite(raw.gems),sound:raw.sound!==false,volume:Math.min(1,finite(raw.volume,.35)),active:restaurants[raw.active]?raw.active:'park',restaurants,lastAt:Math.min(now,finite(raw.lastAt,now))}}return {version:3,coins:finite(legacy?.coins,300),gems:finite(legacy?.gems),sound:legacy?!!legacy.sound:true,volume:.35,active:'park',restaurants:{park:restaurant(legacy||{},3)},lastAt:now}}
 function unlocked(n,id){if(id==='park')return true;if(id==='harbor')return n.restaurants.park.floors>=5;return !!n.restaurants.harbor&&n.restaurants.harbor.floors>=3}
-function rate(n,id){const r=n.restaurants[id];return r?12*r.floors*(1+(r.kitchen+r.lift+r.cash-3)*.1)*(id==='harbor'?1.2:1):0}
+function incomeMultiplier(r){return [0,1,3,10,35,100][r.floors]*(1+(r.kitchen+r.lift+r.cash-3)*.25)}
+function rate(n,id){const r=n.restaurants[id];return r?60*incomeMultiplier(r)*(id==='harbor'?1.2:1):0}
+function orderIncome(n,combo=0,rush=false){const r=n.restaurants[n.active];return Math.round((10+Math.min(5,combo)*2)*incomeMultiplier(r)*(rush?2:1)*(n.active==='harbor'?1.2:1)*(n.active==='sunset'&&rush?1.25:1))}
 function accrue(n,now,includeActive=false){const sec=Math.min(8*3600,Math.max(0,(now-n.lastAt)/1000));let gain=0;for(const id of Object.keys(n.restaurants)){if(id===n.active&&!includeActive)continue;const r=n.restaurants[id],cap=rate(n,id)*480,amount=Math.min(rate(n,id)*sec/60,Math.max(0,cap-r.pending));r.pending+=amount;gain+=amount}n.lastAt=Math.max(n.lastAt,now);return gain}
 function purchase(n,id){const c=CAFES.find(v=>v.id===id);if(!c||n.restaurants[id]||!unlocked(n,id)||n.coins<c.cost)return false;n.coins-=c.cost;n.restaurants[id]=restaurant();return true}
 function collect(n){let amount=0;for(const r of Object.values(n.restaurants)){const part=Math.floor(r.pending);r.pending-=part;amount+=part}n.coins+=amount;return amount}
-function floorPrice(r){return [0,120,240,450,900][r.floors]||0}
+function floorPrice(r){return [0,5000,25000,150000,1000000][r.floors]||0}
 function buyFloor(n){const r=n.restaurants[n.active],cost=floorPrice(r);if(r.floors>=5||n.coins<cost)return false;n.coins-=cost;r.floors++;return true}
 function view(n){const local=new Set(['floors','kitchen','lift','cash','served','best']);return new Proxy({}, {get:(_,k)=>local.has(k)?n.restaurants[n.active][k]:n[k],set:(_,k,v)=>{if(local.has(k))n.restaurants[n.active][k]=v;else n[k]=v;return true}})}
-const api={CAFES,load,unlocked,rate,accrue,purchase,collect,floorPrice,buyFloor,view};if(typeof module!=='undefined')module.exports=api;else root.SushiNetwork=api;
+const api={incomeMultiplier,orderIncome,CAFES,load,unlocked,rate,accrue,purchase,collect,floorPrice,buyFloor,view};if(typeof module!=='undefined')module.exports=api;else root.SushiNetwork=api;
 })(globalThis);
